@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>端口开通审批</title>
+    <style>
+        .approver-selection {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .approver-item {
+            margin: 10px 0;
+        }
+        .approver-item label {
+            margin-left: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="approver-selection">
+        <h3>选择下一步审批人</h3>
+        <div id="approverList"></div>
+        <button onclick="submitApproval()">提交审批</button>
+    </div>
+
+    <script src="port-approval.js"></script>
+    <script>
+        // 渲染审批人列表 - 使用单选按钮替代复选框
+        function renderApproverList() {
+            const approverList = document.getElementById('approverList');
+            const approvers = mockUsers.filter(user => user.role.includes(ROLE.APPROVER));
+            
+            approverList.innerHTML = approvers.map(user => `
+                <div class="approver-item">
+                    <input type="radio" name="approver" id="approver-${user.id}" value="${user.id}">
+                    <label for="approver-${user.id}">${user.name} (${user.department})</label>
+                </div>
+            `).join('');
+        }
+
+        // 提交审批 - 修改为只获取单个选中的审批人
+        function submitApproval() {
+            const selectedApprover = document.querySelector('input[name="approver"]:checked');
+            
+            if (!selectedApprover) {
+                alert('请选择一个审批人');
+                return;
+            }
+
+            const approverId = parseInt(selectedApprover.value);
+            console.log('选中的审批人ID:', approverId);
+            
+            // 更新工单数据 - currentHandlers 现在只包含一个审批人
+            const workflow = mockWorkflows[0];
+            workflow.currentHandlers = [approverId];
+            
+            alert(`已选择审批人: ${mockUsers.find(u => u.id === approverId).name}`);
+        }
+
+        // 页面加载时渲染审批人列表
+        window.onload = function() {
+            renderApproverList();
+        };
+    </script>
+</body>
+</html>
